@@ -3,4 +3,6 @@ dist
 venv
 .vscode
 *egg-info*
-build
+buildvenv
+.venv
+pyxtermjs/__pycache__
