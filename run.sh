@@ -6,4 +6,6 @@ source .venv/bin/activate
 
 pip install .
 
-python -m pyxtermjs
+npm install --save xterm
+
+python -m pyxtermjs $@

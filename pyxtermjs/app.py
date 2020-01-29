@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from jinja2 import Environment, PackageLoader, select_autoescape
 import argparse
 from flask import Flask, render_template
 from flask_socketio import SocketIO
@@ -10,15 +11,24 @@ import termios
 import struct
 import fcntl
 import shlex
-
+import logging
 
 __version__ = "0.4.0.1"
 
-app = Flask(__name__, template_folder=".", static_folder=".", static_url_path="")
-app.config["SECRET_KEY"] = "secret!"
+app = Flask(__name__, template_folder=".", static_folder="static", static_url_path="")
+app.config["SECRET_KEY"] = "secret!a8dys098y"
 app.config["fd"] = None
 app.config["child_pid"] = None
 socketio = SocketIO(app)
+
+app.config['env'] = Environment(
+    loader=PackageLoader('pyxtermjs', 'templates'),
+    autoescape=select_autoescape(['html', 'xml'])
+)
+
+
+def do_template(DAT,STR):
+    return Environment().from_string(STR).render(DAT).strip()
 
 
 def set_winsize(fd, row, col, xpix=0, ypix=0):
@@ -37,10 +47,16 @@ def read_and_forward_pty_output():
                 output = os.read(app.config["fd"], max_read_bytes).decode()
                 socketio.emit("pty-output", {"output": output}, namespace="/pty")
 
+@app.route("/t")
+def _t():
+    DAT =  {'abc':123}
+    return app.config['env'].get_template('mytemplate.html.j2').render(DAT)
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    DAT =  {'abc':123}
+    return app.config['env'].get_template('index.html.j2').render(DAT)
+    #return render_template("index.html")
 
 
 @socketio.on("pty-input", namespace="/pty")
@@ -115,6 +131,10 @@ def main():
         exit(0)
     print(f"serving on http://127.0.0.1:{args.port}")
     app.config["cmd"] = [args.command] + shlex.split(args.cmd_args)
+    app.args = args
+    if not app.args.debug:
+        log = logging.getLogger('werkzeug')
+        log.setLevel(logging.ERROR)
     socketio.run(app, debug=args.debug, port=args.port)
 
 

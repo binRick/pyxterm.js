@@ -11,12 +11,12 @@
 </head>
 <body>
 
-<span style="font-size: 1.4em;">pyxterm.js</span>&nbsp;&nbsp;&nbsp;
+<span style="font-size: 1.4em; display: none;">pyxterm.js</span>&nbsp;&nbsp;&nbsp;
 <span style="font-size: small;">status: <span style="font-size: small;" id="status">connecting...</span></span>
 
 <div style="width: 100%; height: calc(100% - 50px);" id="terminal"></div>
 
-<p style="text-align: right; font-size: small;">
+<p style="text-align: right; font-size: small; display: none;">
   built by <a href="https://grassfedcode.com">Chad Smith</a> <a href="https://github.com/cs01">GitHub</a>
 </p>
 <!-- xterm -->
@@ -35,15 +35,19 @@
   const term = new Terminal({
         cursorBlink: true,
         macOptionIsMeta: true,
-        scrollback: true,
+        //scrollback: true,
+        fontSize: 16,
+        fontWeight: 'normal',
+        font: 'Menlo,monospace',
+        scrollback: 999,
     });
   term.open(document.getElementById('terminal'));
   term.fit()
   term.resize(15, 50)
   console.log(`size: ${term.cols} columns, ${term.rows} rows`)
-  // term.toggleFullScreen(true)
+  //term.toggleFullScreen(true)
   term.fit()
-  term.write("Welcome to pyxterm.js!\nhttps://github.com/cs01/pyxterm.js\n")
+  //term.write("Welcome to pyxterm.js!\nhttps://github.com/cs01/pyxterm.js\n")
   term.on('key', (key, ev) => {
     console.log("pressed key", key)
     console.log("event", ev)
@@ -54,7 +58,7 @@
   const status = document.getElementById("status")
 
   socket.on("pty-output", function(data){
-    console.log("new output", data)
+    //console.log("new output", data)
     term.write(data.output)
   })
 
