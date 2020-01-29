@@ -26,10 +26,8 @@ app.config['env'] = Environment(
     autoescape=select_autoescape(['html', 'xml'])
 )
 
-
 def do_template(DAT,STR):
     return Environment().from_string(STR).render(DAT).strip()
-
 
 def set_winsize(fd, row, col, xpix=0, ypix=0):
     winsize = struct.pack("HHHH", row, col, xpix, ypix)
@@ -86,10 +84,15 @@ def connect():
     # create child process attached to a pty we can read from and write to
     (child_pid, fd) = pty.fork()
     if child_pid == 0:
-        # this is the child process fork.
-        # anything printed here will show up in the pty, including the output
-        # of this subprocess
-        subprocess.run(app.config["cmd"])
+        MODE = 'subprocess'
+        print('MODE={}'.format(MODE))
+        if MODE == 'execvpe':
+            os.chdir('/')
+            env = os.environ
+            env["TERM"] = "xterm-256color"
+            os.execvpe(app.config['cmd'][0], app.config['cmd'], env)
+        else:
+            subprocess.run(app.config["cmd"])
     else:
         # this is the parent process fork.
         # store child fd and pid
